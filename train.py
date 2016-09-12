@@ -41,7 +41,6 @@ xp = chainer.cuda.cupy
 if __name__ == '__main__':
 
     batchsize = 100
-    n_epoch = 10000
     snapshot_interval = 10
 
     model_dir = 'result/model'
@@ -49,6 +48,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input_dir', help='Images directory for training')
     parser.add_argument('--gpu', '-g', type=int, default=-1)
+    parser.add_argument('--epoch', '-e', type=int, default=10000)
     args = parser.parse_args()
 
     train = import_train_images(args.input_dir)
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     sum_loss_gen = numpy.float32(0)
 
     progress = progressbar.ProgressBar()
-    for epoch in progress(range(n_epoch)):
+    for epoch in progress(range(args.epoch)):
         perm = random_indexes(n_train)
         for i in range(0, n_train - (n_train % batchsize), batchsize):
             z = chainer.Variable(
