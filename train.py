@@ -18,7 +18,7 @@ import dcgan
 
 def import_train_images(image_dir):
     files = glob.glob('{}/*'.format(os.path.abspath(image_dir)))
-    dataset = numpy.empty((len(files), 3, 96, 96), dtype=numpy.float32)
+    dataset = numpy.empty((len(files), 3, 64, 64), dtype=numpy.float32)
 
     for i, img_file in enumerate(files):
         img = numpy.asarray(Image.open(img_file).convert(
