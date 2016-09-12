@@ -1,12 +1,10 @@
 import argparse
 import glob
-import math
 import os
 
 import chainer
 import chainer.functions as F
 import chainer.links as L
-import matplotlib.pyplot as plt
 import numpy
 import progressbar
 from chainer import training
