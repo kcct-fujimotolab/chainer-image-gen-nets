@@ -7,6 +7,7 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from chainer import training
@@ -14,8 +15,6 @@ from chainer.training import extensions
 from PIL import Image
 
 import dcgan
-
-matplotlib.use('Agg')
 
 
 if __name__ == '__main__':
