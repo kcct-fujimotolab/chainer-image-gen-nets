@@ -30,7 +30,7 @@ class Generator(chainer.Chain):
 
     def __call__(self, z, test=False):
         h = self.l0(z)
-        h = self.bn01(h, test=test)
+        h = self.bn0l(h, test=test)
         h = F.relu(h)
         h = F.reshape(h, (z.data.shape[0], 512, 4, 4))
 
