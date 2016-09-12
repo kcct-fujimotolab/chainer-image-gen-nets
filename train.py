@@ -42,15 +42,16 @@ if __name__ == '__main__':
 
     batchsize = 100
 
-    model_dir = 'result/model'
-
     parser = argparse.ArgumentParser()
     parser.add_argument('input_dir', help='Images directory for training')
     parser.add_argument('--gpu', '-g', type=int, default=-1)
     parser.add_argument('--epoch', '-e', type=int, default=10000)
     parser.add_argument('--snapshot', type=int, nargs='?',
                         default=range(1, 10001, 10))
+    parser.add_argument('--output_dir', '-o', type=str, default='result')
     args = parser.parse_args()
+
+    model_dir = '{}/model'.format(args.output_dir)
 
     train = import_train_images(args.input_dir)
     n_train = len(train)
