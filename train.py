@@ -42,7 +42,6 @@ if __name__ == '__main__':
 
     batchsize = 100
     n_epoch = 10000
-    n_z = 100
     snapshot_interval = 10
 
     model_dir = 'result/model'
@@ -78,7 +77,7 @@ if __name__ == '__main__':
         perm = random_indexes(n_train)
         for i in range(0, n_train - (n_train % batchsize), batchsize):
             z = chainer.Variable(
-                xp.random.uniform(-1, 1, (batchsize, n_z), dtype=numpy.float32))
+                xp.random.uniform(-1, 1, (batchsize, dcgan.n_z), dtype=numpy.float32))
             y_gen = gen(z)
             y_dis = dis(y_gen)
             loss_gen = F.softmax_cross_entropy(

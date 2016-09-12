@@ -5,12 +5,14 @@ import chainer.functions as F
 import chainer.links as L
 
 
+n_z = 100
+
+
 class Generator(chainer.Chain):
 
     def __init__(self):
-        nz = 100
         super(Generator, self).__init__(
-            l0z=L.Linear(nz, 4 * 4 * 512, wscale=0.02 * math.sqrt(nz)),
+            l0z=L.Linear(n_z, 4 * 4 * 512, wscale=0.02 * math.sqrt(n_z)),
             dc1=L.Deconvolution2D(512, 256, 4, stride=2,
                                   pad=1, wscale=0.02 * math.sqrt(4 * 4 * 512)),
             dc2=L.Deconvolution2D(256, 128, 4, stride=2,
