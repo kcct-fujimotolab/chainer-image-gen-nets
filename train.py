@@ -41,7 +41,6 @@ xp = chainer.cuda.cupy
 if __name__ == '__main__':
 
     batchsize = 100
-    snapshot_interval = 10
 
     model_dir = 'result/model'
 
@@ -49,6 +48,8 @@ if __name__ == '__main__':
     parser.add_argument('input_dir', help='Images directory for training')
     parser.add_argument('--gpu', '-g', type=int, default=-1)
     parser.add_argument('--epoch', '-e', type=int, default=10000)
+    parser.add_argument('--snapshot', type=int, nargs='?',
+                        default=range(1, 10001, 10))
     args = parser.parse_args()
 
     train = import_train_images(args.input_dir)
@@ -103,7 +104,7 @@ if __name__ == '__main__':
             sum_loss_gen += loss_gen.data.get()
             sum_loss_dis += loss_dis.data.get()
 
-        if (epoch + 1) % snapshot_interval == 0:
+        if epoch + 1 in args.snapshot:
             outdir = '{}/{}'.format(model_dir, epoch + 1)
             try:
                 os.makedirs(outdir)
