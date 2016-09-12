@@ -22,6 +22,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--epoch', '-e', type=int, required=True)
+    parser.add_argument('--filename', type=str, default='{epoch}.png')
     args = parser.parse_args()
 
     n_column = 4
@@ -46,4 +47,5 @@ if __name__ == '__main__':
         plt.subplot(n_row, n_column, i + 1)
         plt.imshow(((img + 1) / 2).transpose(1, 2, 0))
         plt.axis('off')
-    plt.savefig('{}/{}.png'.format(output_dir, args.epoch))
+    filename = args.filename.format(epoch=args.epoch)
+    plt.savefig('{}/{}'.format(output_dir, filename))
