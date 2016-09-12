@@ -12,7 +12,7 @@ class Generator(chainer.Chain):
 
     def __init__(self):
         super(Generator, self).__init__(
-            l0z=L.Linear(n_z, 4 * 4 * 512, wscale=0.02 * math.sqrt(n_z)),
+            l0=L.Linear(n_z, 4 * 4 * 512, wscale=0.02 * math.sqrt(n_z)),
             dc1=L.Deconvolution2D(512, 256, 4, stride=2,
                                   pad=1, wscale=0.02 * math.sqrt(4 * 4 * 512)),
             dc2=L.Deconvolution2D(256, 128, 4, stride=2,
@@ -29,12 +29,25 @@ class Generator(chainer.Chain):
         )
 
     def __call__(self, z, test=False):
-        h = F.reshape(F.relu(self.bn0l(self.l0z(z), test=test)),
-                      (z.data.shape[0], 512, 4, 4))
-        h = F.relu(self.bn1(self.dc1(h), test=test))
-        h = F.relu(self.bn2(self.dc2(h), test=test))
-        h = F.relu(self.bn3(self.dc3(h), test=test))
+        h = self.l0(z)
+        h = self.bn01(h, test=test)
+        h = F.relu(h)
+        h = F.reshape(h, (z.data.shape[0], 512, 4, 4))
+
+        h = self.dc1(h)
+        h = self.bn1(h, test=test)
+        h = F.relu(h)
+
+        h = self.dc2(h)
+        h = self.bn2(h, test=test)
+        h = F.relu(h)
+
+        h = self.dc3(h)
+        h = self.bn3(h, test=test)
+        h = F.relu(h)
+
         x = self.dc4(h)
+
         return x
 
 
@@ -50,7 +63,7 @@ class Discriminator(chainer.Chain):
                                wscale=0.02 * math.sqrt(4 * 4 * 128)),
             c3=L.Convolution2D(256, 512, 4, stride=2, pad=1,
                                wscale=0.02 * math.sqrt(4 * 4 * 256)),
-            l4l=L.Linear(4 * 4 * 512, 2, wscale=0.02 * math.sqrt(4 * 4 * 512)),
+            l4=L.Linear(4 * 4 * 512, 2, wscale=0.02 * math.sqrt(4 * 4 * 512)),
             bn0=L.BatchNormalization(64),
             bn1=L.BatchNormalization(128),
             bn2=L.BatchNormalization(256),
@@ -58,9 +71,21 @@ class Discriminator(chainer.Chain):
         )
 
     def __call__(self, x, test=False):
-        h = F.leaky_relu(self.c0(x))
-        h = F.leaky_relu(self.bn1(self.c1(h), test=test))
-        h = F.leaky_relu(self.bn2(self.c2(h), test=test))
-        h = F.leaky_relu(self.bn3(self.c3(h), test=test))
-        l = self.l4l(h)
+        h = self.c0(x)
+        h = F.leaky_relu(h)
+
+        h = self.c1(h)
+        h = self.bn1(h, test=test)
+        h = F.leaky_relu(h)
+
+        h = self.c2(h)
+        h = self.bn2(h, test=test)
+        h = F.leaky_relu(h)
+
+        h = self.c3(h)
+        h = self.bn3(h, test=test)
+        h = F.leaky_relu(h)
+
+        l = self.l4(h)
+
         return l
