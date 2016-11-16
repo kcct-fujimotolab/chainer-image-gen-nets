@@ -2,11 +2,13 @@ import argparse
 import os
 
 import chainer
-import matplotlib; matplotlib.use('Agg') # isort:skip
-import matplotlib.pyplot as plt # isort:skip
 import numpy as np
 
 import dcgan
+
+import matplotlib  # isort:skip
+matplotlib.use('Agg')  # isort:skip
+import matplotlib.pyplot as plt  # isort:skip
 
 
 def predict(epoch, filename='{epoch}.png'):

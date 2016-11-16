@@ -4,7 +4,6 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 
-
 n_z = 100
 
 

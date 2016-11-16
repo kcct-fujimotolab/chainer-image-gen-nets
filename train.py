@@ -123,4 +123,5 @@ if __name__ == '__main__':
 
             filename = args.filename.format(epoch=(epoch + 1))
             predict.predict(epoch + 1, filename=filename)
-            post_slack.upload_img('{}/test/{}'.format(args.output_dir, filename))
+            post_slack.upload_img(
+                '{}/test/{}'.format(args.output_dir, filename))
