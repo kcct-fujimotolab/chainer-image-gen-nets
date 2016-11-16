@@ -12,6 +12,8 @@ from chainer.training import extensions
 from PIL import Image
 
 import dcgan
+import post_slack
+import predict
 
 
 def import_train_images(image_dir):
@@ -47,6 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--snapshot', type=int, nargs='*',
                         default=range(1, 10001, 10))
     parser.add_argument('--output_dir', '-o', type=str, default='result')
+    parser.add_argument('--filename', default='{epoch}.png')
     args = parser.parse_args()
 
     model_dir = '{}/model'.format(args.output_dir)
@@ -117,3 +120,7 @@ if __name__ == '__main__':
                 '{}/dcgan_optimizer_gen.npz'.format(outdir), optimizer_gen)
             chainer.serializers.save_npz(
                 '{}/dcgan_optimizer_dis.npz'.format(outdir), optimizer_dis)
+
+            filename = args.filename.format(epoch=(epoch + 1))
+            predict.predict(epoch + 1, filename=filename)
+            post_slack.upload_img('{}/test/{}'.format(args.output_dir, filename))
