@@ -41,18 +41,26 @@ xp = chainer.cuda.cupy
 if __name__ == '__main__':
 
     batchsize = 100
-
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Trainning with DCGAN')
     parser.add_argument('input_dir', help='Images directory for training')
-    parser.add_argument('--gpu', '-g', type=int, default=-1)
-    parser.add_argument('--epoch', '-e', type=int, default=10000)
+    parser.add_argument('--batchsize', '-b', type=int, default=100,
+                        help='Number of images in each mini-batch')
+    parser.add_argument('--epoch', '-e', type=int, default=20,
+                        help='Number of sweeps over the dataset to train')
+    parser.add_argument('--gpu', '-g', type=int, default=-1,
+                        help='GPU ID (negative value indicates CPU)')
+    parser.add_argument('--out', '-o', default='result',
+                        help='Directory to output the result')
+    parser.add_argument('--resume', '-r', default='',
+                        help='Resume the training from snapshot')
+    parser.add_argument('--unit', '-u', type=int, default=1000,
+                        help='Number of units')
     parser.add_argument('--snapshot', type=int, nargs='*',
                         default=range(1, 10001, 10))
-    parser.add_argument('--output_dir', '-o', type=str, default='result')
     parser.add_argument('--filename', default='{epoch}.png')
     args = parser.parse_args()
 
-    model_dir = '{}/model'.format(args.output_dir)
+    model_dir = '{}/model'.format(args.out)
 
     train = import_train_images(args.input_dir)
     n_train = len(train)
@@ -124,4 +132,4 @@ if __name__ == '__main__':
             filename = args.filename.format(epoch=(epoch + 1))
             generate.generate(epoch + 1, filename=filename)
             post_slack.upload_img(
-                '{}/test/{}'.format(args.output_dir, filename))
+                '{}/test/{}'.format(args.out, filename))
