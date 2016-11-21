@@ -4,16 +4,13 @@ import os
 
 import chainer
 import chainer.functions as F
-import chainer.links as L
 import numpy
 import progressbar
-from chainer import training
-from chainer.training import extensions
 from PIL import Image
 
 import dcgan
-import post_slack
 import generate
+import post_slack
 
 
 def import_train_images(image_dir):
