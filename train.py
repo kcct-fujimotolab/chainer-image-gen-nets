@@ -13,7 +13,7 @@ from PIL import Image
 
 import dcgan
 import post_slack
-import predict
+import generate
 
 
 def import_train_images(image_dir):
@@ -122,6 +122,6 @@ if __name__ == '__main__':
                 '{}/dcgan_optimizer_dis.npz'.format(outdir), optimizer_dis)
 
             filename = args.filename.format(epoch=(epoch + 1))
-            predict.predict(epoch + 1, filename=filename)
+            generate.generate(epoch + 1, filename=filename)
             post_slack.upload_img(
                 '{}/test/{}'.format(args.output_dir, filename))

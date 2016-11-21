@@ -11,7 +11,7 @@ matplotlib.use('Agg')  # isort:skip
 import matplotlib.pyplot as plt  # isort:skip
 
 
-def predict(epoch, filename='{epoch}.png'):
+def generate(epoch, filename='{epoch}.png'):
     n_column = 4
     n_row = 4
     n_img = n_column * n_row
@@ -45,4 +45,4 @@ if __name__ == '__main__':
     parser.add_argument('--filename', type=str, default='{epoch}.png')
     args = parser.parse_args()
 
-    predict(args.epoch, args.filename)
+    generate(args.epoch, args.filename)
