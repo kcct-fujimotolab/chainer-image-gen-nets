@@ -1,3 +1,5 @@
+import os
+
 import slacker
 
 apikey = os.getenv('SLACK_APIKEY')
