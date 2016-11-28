@@ -8,9 +8,8 @@ import numpy
 import progressbar
 from PIL import Image
 
-import dcgan
-import generate
 import post_slack
+from dcgan import dcgan, generate
 
 
 def import_train_images(image_dir):
