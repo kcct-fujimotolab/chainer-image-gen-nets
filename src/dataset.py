@@ -41,6 +41,7 @@ def main():
     files = glob.iglob(os.path.join(args.input_dir, '*'))
     images = convert(files)
     save(args.output, images)
+    print('{} files compressed and saved as {}'.format(len(images), args.output))
 
 
 if __name__ == '__main__':
