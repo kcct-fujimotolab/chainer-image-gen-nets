@@ -1,4 +1,5 @@
 result/
+*.npz
 
 
 # Byte-compiled / optimized / DLL files
