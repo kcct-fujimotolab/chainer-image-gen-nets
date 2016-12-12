@@ -20,8 +20,11 @@ def convert(files, size=(64, 64)):
     return images
 
 
-def load(filename):
+def load(filename, ndim=2):
     images = numpy.load(filename)['img']
+    if ndim == 1:
+        images = images.reshape(-1,
+                                images.shape[1], images.shape[2] * images.shape[3])
     return images
 
 
