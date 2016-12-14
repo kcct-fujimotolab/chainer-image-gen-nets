@@ -37,9 +37,9 @@ def main():
 
     train = dataset.load(args.dataset, ndim=1)
     train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
-    n_train, n_color, image_size = train.shape
+    n_train, image_size = train.shape
 
-    model = vae.net.VAE(n_color * image_size, args.dimz, 500)
+    model = vae.net.VAE(image_size, args.dimz, 500)
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()
         model.to_gpu()

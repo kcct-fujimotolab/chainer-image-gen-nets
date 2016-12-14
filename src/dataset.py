@@ -21,12 +21,16 @@ def convert(files, size=(64, 64)):
     return images
 
 
-def load(filename, ndim=2):
+def load(filename, ndim=3):
     images = numpy.load(filename)['img']
     n_color = images.shape[1]
     width, height = images.shape[2:]
     if ndim == 1:
-        images = images.reshape(-1, n_color, width * height)
+        return images.reshape(-1, n_color * width * height)
+    if ndim == 2:
+        return images.reshape(-1, n_color, width * height)
+    if ndim == 3:
+        return images
     return images
 
 
