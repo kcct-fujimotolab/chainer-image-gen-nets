@@ -23,9 +23,9 @@ def convert(files, size=(64, 64)):
 
 def load(filename, ndim=2):
     images = numpy.load(filename)['img']
+    width, height = images.shape[2:]
     if ndim == 1:
-        images = images.reshape(-1,
-                                images.shape[1], images.shape[2] * images.shape[3])
+        images = images.reshape(-1, -1, width * height)
     return images
 
 
