@@ -32,6 +32,7 @@ def main():
     print('GPU: {}'.format(args.gpu))
     print('# Minibatch-size: {}'.format(args.batchsize))
     print('# epoch: {}'.format(args.epoch))
+    print('# dim z: {}'.format(args.dimz))
     print('')
 
     train = dataset.load(args.dataset, ndim=1)
