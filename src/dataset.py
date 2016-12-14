@@ -51,7 +51,7 @@ def main():
 
     files = glob.iglob(os.path.join(args.input_dir, '*'))
     images = convert(files, size=args.resize)
-    save(args.output, images)
+    save(args.output, images, compress=args.compress)
     print('{} files compressed and saved as {}'.format(len(images), args.output))
 
 
