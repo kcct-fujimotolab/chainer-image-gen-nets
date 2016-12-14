@@ -14,6 +14,7 @@ def convert(files, size=(64, 64)):
 
     for i, f in enumerate(files):
         img = PIL.Image.open(f).convert('RGB').resize(size)
+        # convert [[[r, g, b]]] to [[[r]], [[g]], [[b]]]
         img = numpy.asarray(img).astype(numpy.float32).transpose(2, 0, 1)
         images[i] = img
 
