@@ -28,14 +28,18 @@ def load(filename, ndim=2):
     return images
 
 
-def save(filename, images):
-    numpy.savez(filename, img=images)
+def save(filename, images, compress=True):
+    if compress:
+        numpy.savez_compressed(filename, img=images)
+    else:
+        numpy.savez(filename, img=images)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_dir')
     parser.add_argument('--output', '-o', default='dataset.npz')
+    parser.add_argument('--compress', '-c', action='store_true')
     args = parser.parse_args()
 
     files = glob.iglob(os.path.join(args.input_dir, '*'))
