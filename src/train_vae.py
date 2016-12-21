@@ -27,6 +27,8 @@ def main():
     # parser.add_argument('--filename', default='{epoch}.png')
     parser.add_argument('--dimz', '-z', type=int, default=20,
                         help='dimention of encoded vector')
+    parser.add_argument('--snapshot_interval', '-s', type=int, default=1000,
+                        help='Interval of snapshot')
     args = parser.parse_args()
 
     print('GPU: {}'.format(args.gpu))
@@ -55,6 +57,8 @@ def main():
     trainer.extend(extensions.LogReport())
     trainer.extend(extensions.PrintReport(['epoch', 'main/loss']))
     trainer.extend(extensions.ProgressBar())
+    trainer.extend(extensions.snapshot(), trigger=(
+        args.snapshot_interval, 'epoch'))
 
     trainer.run()
 
