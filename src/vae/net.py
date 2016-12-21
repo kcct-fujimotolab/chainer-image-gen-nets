@@ -1,6 +1,7 @@
 import chainer
 import chainer.functions as F
 import chainer.links as L
+import six
 from chainer.functions.loss.vae import gaussian_kl_divergence
 
 
@@ -45,17 +46,19 @@ class VAE(chainer.Chain):
             k (int): Number of Monte Carlo samples used in encoded vector.
             train (bool): If true loss_function is used for training.
         """
-        def lf(x):
+        def loss_func(x):
             mu, ln_var = self.encode(x)
             batchsize = len(mu.data)
-            # reconstruction loss
-            rec_loss = 0
+
+            reconstruction_loss = 0
             for l in six.moves.range(k):
                 z = F.gaussian(mu, ln_var)
-                rec_loss += F.bernoulli_nll(x, self.decode(z, sigmoid=False)) \
-                    / (k * batchsize)
-            self.rec_loss = rec_loss
-            self.loss = self.rec_loss + \
-                C * gaussian_kl_divergence(mu, ln_var) / batchsize
-            return self.loss
-        return lf
+                reconstruction_loss += F.bernoulli_nll(
+                    x, self.decode(z, sigmoid=False)) / (k * batchsize)
+
+            loss = reconstruction_loss + C * \
+                gaussian_kl_divergence(mu, ln_var) / batchsize
+            chainer.report({'loss': loss}, self)
+            return loss
+
+        return loss_func
