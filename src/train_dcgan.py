@@ -1,6 +1,7 @@
 import argparse
 import glob
 import os
+import dataset
 
 import chainer
 import chainer.functions as F
@@ -10,20 +11,6 @@ from PIL import Image
 
 import post_slack
 from dcgan import dcgan, generate
-
-
-def import_train_images(image_dir):
-    files = glob.glob('{}/*'.format(os.path.abspath(image_dir)))
-    dataset = numpy.empty((len(files), 3, 64, 64), dtype=numpy.float32)
-
-    for i, img_file in enumerate(files):
-        img = numpy.asarray(Image.open(img_file).convert(
-            'RGB')).astype(numpy.float32).transpose(2, 0, 1)
-        # 0..256 to -1..1
-        img = (img / (256 / 2)) - 1
-        dataset[i] = img
-
-    return dataset
 
 
 def random_indexes(n):
@@ -38,7 +25,7 @@ if __name__ == '__main__':
 
     batchsize = 100
     parser = argparse.ArgumentParser(description='Trainning with DCGAN')
-    parser.add_argument('input_dir', help='Images directory for training')
+    parser.add_argument('dataset', help='The npz formatted dataset file')
     parser.add_argument('--batchsize', '-b', type=int, default=100,
                         help='Number of images in each mini-batch')
     parser.add_argument('--epoch', '-e', type=int, default=20,
@@ -58,7 +45,7 @@ if __name__ == '__main__':
 
     model_dir = '{}/model'.format(args.out)
 
-    train = import_train_images(args.input_dir)
+    train = dataset.load(args.dataset, ndim=3)
     n_train = len(train)
 
     gen = dcgan.Generator()
