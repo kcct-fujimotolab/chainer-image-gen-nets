@@ -19,8 +19,6 @@ def random_indexes(n):
     return xs
 
 
-xp = chainer.cuda.cupy
-
 if __name__ == '__main__':
 
     batchsize = 100
@@ -42,6 +40,8 @@ if __name__ == '__main__':
                         default=range(1, 10001, 10))
     parser.add_argument('--filename', default='{epoch}.png')
     args = parser.parse_args()
+
+    xp = chainer.cuda.cupy if args.gpu >= 0 else numpy
 
     model_dir = '{}/model'.format(args.out)
 
