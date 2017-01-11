@@ -1,14 +1,12 @@
 import argparse
-import glob
 import os
-import dataset
 
 import chainer
 import chainer.functions as F
 import numpy
 import progressbar
-from PIL import Image
 
+import dataset
 import post_slack
 from dcgan import dcgan, generate
 
