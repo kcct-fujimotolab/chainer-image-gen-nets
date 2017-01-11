@@ -61,28 +61,28 @@ if __name__ == '__main__':
     optimizer_gen.add_hook(chainer.optimizer.WeightDecay(0.00001))
     optimizer_dis.add_hook(chainer.optimizer.WeightDecay(0.00001))
 
-    sum_loss_dis = numpy.float32(0)
-    sum_loss_gen = numpy.float32(0)
+    sum_loss_dis = xp.float32(0)
+    sum_loss_gen = xp.float32(0)
 
     progress = progressbar.ProgressBar()
     for epoch in progress(range(args.epoch)):
         perm = random_indexes(n_train)
         for i in range(0, n_train - (n_train % batchsize), batchsize):
             z = chainer.Variable(
-                xp.random.uniform(-1, 1, (batchsize, net.n_z), dtype=numpy.float32))
+                xp.random.uniform(-1, 1, (batchsize, net.n_z)).astype(xp.float32))
             y_gen = gen(z)
             y_dis = dis(y_gen)
             loss_gen = F.softmax_cross_entropy(
-                y_dis, chainer.Variable(xp.zeros(batchsize, dtype=numpy.int32)))
+                y_dis, chainer.Variable(xp.zeros(batchsize, dtype=xp.int32)))
             loss_dis = F.softmax_cross_entropy(
-                y_dis, chainer.Variable(xp.ones(batchsize, dtype=numpy.int32)))
+                y_dis, chainer.Variable(xp.ones(batchsize, dtype=xp.int32)))
 
             images = train[perm[i:i + batchsize]]
             if args.gpu >= 0:
                 images = chainer.cuda.to_gpu(images)
             y_dis = dis(chainer.Variable(images))
             loss_dis += F.softmax_cross_entropy(
-                y_dis, chainer.Variable(xp.zeros(batchsize, dtype=numpy.int32)))
+                y_dis, chainer.Variable(xp.zeros(batchsize, dtype=xp.int32)))
 
             optimizer_gen.zero_grads()
             loss_gen.backward()
