@@ -8,7 +8,7 @@ import progressbar
 
 import dataset
 import post_slack
-from dcgan import dcgan, generate
+from dcgan import net, generate
 
 
 def random_indexes(n):
@@ -46,8 +46,8 @@ if __name__ == '__main__':
     train = dataset.load(args.dataset, ndim=3)
     n_train = len(train)
 
-    gen = dcgan.Generator()
-    dis = dcgan.Discriminator()
+    gen = net.Generator()
+    dis = net.Discriminator()
 
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()
@@ -69,7 +69,7 @@ if __name__ == '__main__':
         perm = random_indexes(n_train)
         for i in range(0, n_train - (n_train % batchsize), batchsize):
             z = chainer.Variable(
-                xp.random.uniform(-1, 1, (batchsize, dcgan.n_z), dtype=numpy.float32))
+                xp.random.uniform(-1, 1, (batchsize, net.n_z), dtype=numpy.float32))
             y_gen = gen(z)
             y_dis = dis(y_gen)
             loss_gen = F.softmax_cross_entropy(

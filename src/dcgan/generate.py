@@ -4,7 +4,7 @@ import os
 import chainer
 import numpy as np
 
-from dcgan import dcgan
+from dcgan import net
 
 import matplotlib  # isort:skip
 matplotlib.use('Agg')  # isort:skip
@@ -24,10 +24,10 @@ def generate(epoch, filename='{epoch}.png'):
     except:
         pass
 
-    gen = dcgan.Generator()
+    gen = net.Generator()
     chainer.serializers.load_npz(
         '{}/{}/dcgan_model_gen.npz'.format(model_dir, epoch), gen)
-    z = np.random.uniform(-1, 1, (n_img, dcgan.n_z)).astype(np.float32)
+    z = np.random.uniform(-1, 1, (n_img, net.n_z)).astype(np.float32)
 
     y = gen(z, test=True)
     for i, img in enumerate(y.data):
