@@ -4,7 +4,7 @@ import os
 import chainer
 import numpy as np
 
-import dcgan
+from dcgan import dcgan
 
 import matplotlib  # isort:skip
 matplotlib.use('Agg')  # isort:skip
