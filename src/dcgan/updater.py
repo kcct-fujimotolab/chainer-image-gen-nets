@@ -36,7 +36,7 @@ class DCGANUpdater(chainer.training.StandardUpdater):
 
         y_real = self.dis(x_real, test=False)
 
-        z = Variable(xp.asarray(gen.make_hidden(batchsize)))
+        z = Variable(xp.asarray(self.gen.make_hidden(batchsize)))
         x_fake = self.gen(z, test=False)
         y_fake = self.dis(x_fake, test=False)
 

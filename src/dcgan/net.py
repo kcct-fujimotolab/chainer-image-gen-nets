@@ -1,6 +1,7 @@
 import chainer
 import chainer.functions as F
 import chainer.links as L
+import numpy as np
 
 n_z = 100
 
@@ -50,6 +51,9 @@ class Generator(chainer.Chain):
         x = self.dc4(h)
 
         return x
+
+    def make_hidden(self, batchsize):
+        return np.random.uniform(-1, 1, (batchsize, n_z, 1, 1)).astype(np.float32)
 
 
 class Discriminator(chainer.Chain):
