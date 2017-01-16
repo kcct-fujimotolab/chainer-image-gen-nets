@@ -46,8 +46,10 @@ if __name__ == '__main__':
     train = dataset.load(args.dataset, ndim=3)
     n_train = len(train)
 
-    gen = net.Generator()
-    dis = net.Discriminator()
+    n_train, n_color, width, height = train.shape
+
+    gen = net.Generator(n_color)
+    dis = net.Discriminator(n_color)
 
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()
