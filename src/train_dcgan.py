@@ -1,14 +1,13 @@
 import argparse
-import os
 
 import chainer
-import chainer.functions as F
 import numpy
-import progressbar
+from chainer import training
+from chainer.training import extensions
 
 import dataset
-import post_slack
-from dcgan import generate, net
+from dcgan import net
+from dcgan.updater import DCGANUpdater
 
 
 def random_indexes(n):
@@ -19,7 +18,6 @@ def random_indexes(n):
 
 if __name__ == '__main__':
 
-    batchsize = 100
     parser = argparse.ArgumentParser(description='Trainning with DCGAN')
     dataset_options = parser.add_mutually_exclusive_group(required=True)
     dataset_options.add_argument(
@@ -42,12 +40,9 @@ if __name__ == '__main__':
                         help='Resume the training from snapshot')
     parser.add_argument('--unit', '-u', type=int, default=1000,
                         help='Number of units')
-    parser.add_argument('--snapshot', type=int, nargs='*',
-                        default=range(1, 10001, 10))
+    parser.add_argument('--snapshot_interval', type=int, default=50)
     parser.add_argument('--filename', default='{epoch}.png')
     args = parser.parse_args()
-
-    xp = chainer.cuda.cupy if args.gpu >= 0 else numpy
 
     model_dir = '{}/model'.format(args.out)
 
@@ -65,8 +60,8 @@ if __name__ == '__main__':
 
     n_train, n_color, width, height = train.shape
 
-    gen = net.Generator(n_color)
-    dis = net.Discriminator(n_color)
+    gen = net.Generator(width, n_color)
+    dis = net.Discriminator(width, n_color)
 
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()
@@ -80,56 +75,21 @@ if __name__ == '__main__':
     optimizer_gen.add_hook(chainer.optimizer.WeightDecay(0.00001))
     optimizer_dis.add_hook(chainer.optimizer.WeightDecay(0.00001))
 
-    sum_loss_dis = xp.float32(0)
-    sum_loss_gen = xp.float32(0)
+    train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
+    updater = DCGANUpdater(gen, dis, iterator=train_iter, optimizer={
+                           'gen': optimizer_gen, 'dis': optimizer_dis}, device=args.gpu)
+    trainer = training.Trainer(updater, (args.epoch, 'epoch'), out=args.out)
 
-    progress = progressbar.ProgressBar()
-    for epoch in progress(range(args.epoch)):
-        perm = random_indexes(n_train)
-        for i in range(0, n_train - (n_train % batchsize), batchsize):
-            z = chainer.Variable(
-                xp.random.uniform(-1, 1, (batchsize, net.n_z)).astype(xp.float32))
-            y_gen = gen(z)
-            y_dis = dis(y_gen)
-            loss_gen = F.softmax_cross_entropy(
-                y_dis, chainer.Variable(xp.zeros(batchsize, dtype=xp.int32)))
-            loss_dis = F.softmax_cross_entropy(
-                y_dis, chainer.Variable(xp.ones(batchsize, dtype=xp.int32)))
+    snapshot_interval = (args.snapshot_interval, 'iteration')
+    trainer.extend(extensions.snapshot(
+        filename='snapshot_iter_{.updater.iteration}.npz'), trigger=snapshot_interval)
+    trainer.extend(extensions.LogReport())
+    trainer.extend(extensions.PrintReport([
+        'epoch', 'iteration', 'gen/loss', 'dis/loss',
+    ]))
+    trainer.extend(extensions.ProgressBar())
 
-            images = train[perm[i:i + batchsize]]
-            if args.gpu >= 0:
-                images = chainer.cuda.to_gpu(images)
-            y_dis = dis(chainer.Variable(images))
-            loss_dis += F.softmax_cross_entropy(
-                y_dis, chainer.Variable(xp.zeros(batchsize, dtype=xp.int32)))
+    if args.resume:
+        chainer.serializers.load_npz(args.resume, trainer)
 
-            optimizer_gen.zero_grads()
-            loss_gen.backward()
-            optimizer_gen.update()
-
-            optimizer_dis.zero_grads()
-            loss_dis.backward()
-            optimizer_dis.update()
-
-            sum_loss_gen += loss_gen.data.get()
-            sum_loss_dis += loss_dis.data.get()
-
-        if epoch + 1 in args.snapshot:
-            outdir = '{}/{}'.format(model_dir, epoch + 1)
-            try:
-                os.makedirs(outdir)
-            except:
-                pass
-            chainer.serializers.save_npz(
-                '{}/dcgan_model_gen.npz'.format(outdir), gen)
-            chainer.serializers.save_npz(
-                '{}/dcgan_model_dis.npz'.format(outdir), dis)
-            chainer.serializers.save_npz(
-                '{}/dcgan_optimizer_gen.npz'.format(outdir), optimizer_gen)
-            chainer.serializers.save_npz(
-                '{}/dcgan_optimizer_dis.npz'.format(outdir), optimizer_dis)
-
-            filename = args.filename.format(epoch=(epoch + 1))
-            generate.generate(epoch + 1, filename=filename)
-            post_slack.upload_img(
-                '{}/test/{}'.format(args.out, filename))
+    trainer.run()
