@@ -1,4 +1,3 @@
-
 import chainer
 import chainer.functions as F
 import chainer.links as L
@@ -14,7 +13,8 @@ class Generator(chainer.Chain):
             dc1=L.Deconvolution2D(512, 256, 4, stride=2, pad=1, wscale=wscale),
             dc2=L.Deconvolution2D(256, 128, 4, stride=2, pad=1, wscale=wscale),
             dc3=L.Deconvolution2D(128, 64, 4, stride=2, pad=1, wscale=wscale),
-            dc4=L.Deconvolution2D(64, n_color, 4, stride=2, pad=1, wscale=wscale),
+            dc4=L.Deconvolution2D(
+                64, n_color, 4, stride=2, pad=1, wscale=wscale),
             bn0l=L.BatchNormalization(4 * 4 * 512),
             bn0=L.BatchNormalization(512),
             bn1=L.BatchNormalization(256),

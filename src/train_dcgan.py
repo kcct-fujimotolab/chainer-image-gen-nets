@@ -8,7 +8,7 @@ import progressbar
 
 import dataset
 import post_slack
-from dcgan import net, generate
+from dcgan import generate, net
 
 
 def random_indexes(n):
