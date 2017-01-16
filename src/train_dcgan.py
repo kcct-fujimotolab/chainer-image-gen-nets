@@ -21,7 +21,15 @@ if __name__ == '__main__':
 
     batchsize = 100
     parser = argparse.ArgumentParser(description='Trainning with DCGAN')
-    parser.add_argument('dataset', help='The npz formatted dataset file')
+    dataset_options = parser.add_mutually_exclusive_group(required=True)
+    dataset_options.add_argument(
+        '--dataset', '-d', help='The npz formatted dataset file')
+    dataset_options.add_argument(
+        '--use-mnist', action='store_true', help='Use mnist dataset')
+    dataset_options.add_argument(
+        '--use-cifar10', action='store_true', help='Use CIFAR-10 dataset')
+    dataset_options.add_argument(
+        '--use-cifar100', action='store_true', help='Use CIFAR-100 dataset')
     parser.add_argument('--batchsize', '-b', type=int, default=100,
                         help='Number of images in each mini-batch')
     parser.add_argument('--epoch', '-e', type=int, default=20,
@@ -43,8 +51,17 @@ if __name__ == '__main__':
 
     model_dir = '{}/model'.format(args.out)
 
-    train = dataset.load(args.dataset, ndim=3)
-    n_train = len(train)
+    if args.dataset:
+        train = dataset.load(args.dataset, ndim=3)
+    elif args.use_mnist:
+        train, _ = chainer.datasets.get_mnist(
+            withlabel=False, scale=255., ndim=3)
+    elif args.use_cifar10:
+        train, _ = chainer.datasets.get_cifar10(
+            withlabel=False, scale=255., ndim=3)
+    elif args.use_cifar100:
+        train, _ = chainer.datasets.get_cifar100(
+            withlabel=False, scale=255., ndim=3)
 
     n_train, n_color, width, height = train.shape
 
