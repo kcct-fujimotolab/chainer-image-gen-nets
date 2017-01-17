@@ -10,12 +10,6 @@ from dcgan import net
 from dcgan.updater import DCGANUpdater
 
 
-def random_indexes(n):
-    xs = numpy.arange(n)
-    numpy.random.shuffle(xs)
-    return xs
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Trainning with DCGAN')
@@ -43,8 +37,6 @@ if __name__ == '__main__':
     parser.add_argument('--snapshot_interval', type=int, default=50)
     parser.add_argument('--filename', default='{epoch}.png')
     args = parser.parse_args()
-
-    model_dir = '{}/model'.format(args.out)
 
     if args.dataset:
         train = dataset.load(args.dataset, ndim=3)
