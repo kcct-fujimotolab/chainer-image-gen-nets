@@ -20,7 +20,10 @@ def make_image(gen, dis, rows, cols, output_dir, filename='image.png'):
     _, _, H, W = x.shape
     x = x.reshape((rows, cols, gen.n_color, H, W))
     x = x.transpose(0, 3, 1, 4, 2)
-    x = x.reshape((rows * H, cols * W, gen.n_color))
+    if gen.n_color == 1: # grayscale
+        x = x.reshape((rows * H, cols * W))
+    else:
+        x = x.reshape((rows * H, cols * W, gen.n_color))
 
     preview_dir = os.path.join(output_dir, 'preview')
     preview_path = os.path.join(preview_dir, filename)
