@@ -1,14 +1,12 @@
 import argparse
 
 import chainer
-import numpy
 from chainer import training
 from chainer.training import extensions
 
 import dataset
-from dcgan import net
+from dcgan import generate, net
 from dcgan.updater import DCGANUpdater
-
 
 if __name__ == '__main__':
 
@@ -33,7 +31,8 @@ if __name__ == '__main__':
     parser.add_argument('--resume', '-r', default='',
                         help='Resume the training from snapshot')
     parser.add_argument('--snapshot_interval', type=int, default=50)
-    parser.add_argument('--filename', default='{epoch}.png')
+    parser.add_argument('--row', type=int, default=4)
+    parser.add_argument('--col', type=int, default=4)
     args = parser.parse_args()
 
     if args.dataset:
@@ -78,6 +77,8 @@ if __name__ == '__main__':
         'epoch', 'iteration', 'gen/loss', 'dis/loss',
     ]))
     trainer.extend(extensions.ProgressBar())
+    trainer.extend(generate.generate_image_extension(
+        gen, dis, args.row, args.col, args.out))
 
     if args.resume:
         chainer.serializers.load_npz(args.resume, trainer)

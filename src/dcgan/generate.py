@@ -1,48 +1,37 @@
-import argparse
 import os
 
 import chainer
+import chainer.cuda
 import numpy as np
-
-from dcgan import net
-
-import matplotlib  # isort:skip
-matplotlib.use('Agg')  # isort:skip
-import matplotlib.pyplot as plt  # isort:skip
+from chainer import Variable
+from PIL import Image
 
 
-def generate(epoch, filename='{epoch}.png'):
-    n_column = 4
-    n_row = 4
-    n_img = n_column * n_row
+def make_image(gen, dis, rows, cols, output_dir):
+    np.random.seed(0)
+    n_images = rows * cols
+    xp = gen.xp
+    z = Variable(xp.asarray(gen.make_hidden(n_images)))
+    x = gen(z, test=True)
+    x = chainer.cuda.to_cpu(x.data)
+    np.random.seed()
 
-    model_dir = 'result/model'
-    output_dir = 'result/test'
+    x = np.asarray(np.clip(x * 255, 0.0, 255.0), dtype=np.uint8)
+    _, _, H, W = x.shape
+    x = x.reshape((rows, cols, 3, H, W))
+    x = x.transpose(0, 3, 1, 4, 2)
+    x = x.reshape((rows * H, cols * W, 3))
 
-    try:
-        os.makedirs(output_dir)
-    except:
-        pass
-
-    gen = net.Generator()
-    chainer.serializers.load_npz(
-        '{}/{}/dcgan_model_gen.npz'.format(model_dir, epoch), gen)
-    z = np.random.uniform(-1, 1, (n_img, net.n_z)).astype(np.float32)
-
-    y = gen(z, test=True)
-    for i, img in enumerate(y.data):
-        plt.subplot(n_row, n_column, i + 1)
-        plt.imshow(((img + 1) / 2).transpose(1, 2, 0))
-        plt.axis('off')
-    filename = filename.format(epoch=epoch)
-    plt.savefig('{}/{}'.format(output_dir, filename))
+    preview_dir = os.path.join(output_dir, 'preview')
+    preview_path = os.path.join(preview_dir, 'image{:0>8}.png'.format(trainer.updater.epoch))
+    if not os.path.exists(preview_dir):
+        os.makedirs(preview_dir)
+    Image.fromarray(x).save(preview_path)
 
 
-if __name__ == '__main__':
+def generate_image_extension(gen, dis, rows, cols, output_dir):
+    @chainer.training.make_extension()
+    def mkimg(trainer):
+        make_image(gen, dis, rows, cols, output_dir)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--epoch', '-e', type=int, required=True)
-    parser.add_argument('--filename', type=str, default='{epoch}.png')
-    args = parser.parse_args()
-
-    generate(args.epoch, args.filename)
+    return mkimg
