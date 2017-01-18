@@ -10,8 +10,8 @@ from gennet.dcgan import generate
 from gennet.dcgan import net
 from gennet.dcgan.updater import DCGANUpdater
 
-if __name__ == '__main__':
 
+def main():
     parser = argparse.ArgumentParser(description='Trainning with DCGAN')
     dataset_options = parser.add_mutually_exclusive_group(required=True)
     dataset_options.add_argument(
@@ -101,3 +101,7 @@ if __name__ == '__main__':
         chainer.serializers.load_npz(args.resume, trainer)
 
     trainer.run()
+
+
+if __name__ == '__main__':
+    main()
