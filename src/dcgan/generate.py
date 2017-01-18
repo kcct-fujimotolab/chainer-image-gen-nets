@@ -27,6 +27,7 @@ def make_image(gen, dis, rows, cols, output_dir):
     if not os.path.exists(preview_dir):
         os.makedirs(preview_dir)
     Image.fromarray(x).save(preview_path)
+    return preview_path
 
 
 def generate_image_extension(gen, dis, rows, cols, output_dir):
@@ -35,3 +36,12 @@ def generate_image_extension(gen, dis, rows, cols, output_dir):
         make_image(gen, dis, rows, cols, output_dir)
 
     return mkimg
+
+
+def generate_and_post_slack_extension(gen, dis, rows, cols, output_dir, apikey, channel):
+    @chainer.training.make_extension()
+    def post(trainer):
+        img_path = make_image(gen, dis, rows, cols, output_dir)
+        upload_img(apikey, channel, img_path)
+
+    return post

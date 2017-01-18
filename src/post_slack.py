@@ -1,11 +1,6 @@
-import os
-
 import slacker
 
-apikey = os.getenv('SLACK_APIKEY')
-channel = os.getenv('SLACK_CHANNEL')
-slack = slacker.Slacker(apikey)
 
-
-def upload_img(imgfile):
+def upload_img(apikey, channel, imgfile):
+    slack = slacker.Slacker(apikey)
     slack.files.upload(imgfile, channels=channel)

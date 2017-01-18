@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import chainer
 from chainer import training
@@ -33,7 +34,18 @@ if __name__ == '__main__':
     parser.add_argument('--snapshot_interval', type=int, default=50)
     parser.add_argument('--row', type=int, default=4)
     parser.add_argument('--col', type=int, default=4)
+    parser.add_argument(
+        '--slack-apikey', default=os.environ.get('SLACK_APIKEY'))
+    parser.add_argument('--slack-channel',
+                        default=os.environ.get('SLACK_CHANNEL'))
     args = parser.parse_args()
+
+    if args.slack_apikey and args.slack_channel:
+        print('# Post generated images to Slack (channel: {})'.format(
+            args.slack_channel))
+    else:
+        print("# Don't post to Slack, but generated images will save into {}".format(
+            args.out))
 
     if args.dataset:
         train = dataset.load(args.dataset, ndim=3)
@@ -77,8 +89,12 @@ if __name__ == '__main__':
         'epoch', 'iteration', 'gen/loss', 'dis/loss',
     ]))
     trainer.extend(extensions.ProgressBar())
-    trainer.extend(generate.generate_image_extension(
-        gen, dis, args.row, args.col, args.out))
+    if args.slack_apikey and args.slack_channel:
+        trainer.extend(generate.generate_and_post_slack_extension(
+            gen, dis, args.row, args.col, args.out, args.slack_apikey, args.slack_channel), trigger=snapshot_interval)
+    else:
+        trainer.extend(generate.generate_image_extension(
+            gen, dis, args.row, args.col, args.out), trigger=snapshot_interval)
 
     if args.resume:
         chainer.serializers.load_npz(args.resume, trainer)
