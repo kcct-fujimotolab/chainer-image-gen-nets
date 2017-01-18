@@ -18,9 +18,9 @@ def make_image(gen, dis, rows, cols, output_dir):
 
     x = np.asarray(np.clip(x * 255, 0.0, 255.0), dtype=np.uint8)
     _, _, H, W = x.shape
-    x = x.reshape((rows, cols, 3, H, W))
+    x = x.reshape((rows, cols, gen.n_color, H, W))
     x = x.transpose(0, 3, 1, 4, 2)
-    x = x.reshape((rows * H, cols * W, 3))
+    x = x.reshape((rows * H, cols * W, gen.n_color))
 
     preview_dir = os.path.join(output_dir, 'preview')
     preview_path = os.path.join(

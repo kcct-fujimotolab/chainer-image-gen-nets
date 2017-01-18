@@ -14,6 +14,7 @@ class Generator(chainer.Chain):
 
     def __init__(self, image_size, n_color, wscale=0.02):
         self.image_size = image_size
+        self.n_color = n_color
         self.conved_size = conved_image_size(image_size)
         super(Generator, self).__init__(
             l0=L.Linear(n_z, self.conved_size ** 2 * 512, wscale=wscale),
@@ -60,6 +61,7 @@ class Discriminator(chainer.Chain):
 
     def __init__(self, image_size, n_color, wscale=0.02):
         self.image_size = image_size
+        self.n_color = n_color
         self.conved_size = conved_image_size(image_size)
         super(Discriminator, self).__init__(
             c0=L.Convolution2D(n_color, 64, 4, stride=2, pad=1, wscale=wscale),
