@@ -6,6 +6,8 @@ import numpy as np
 from chainer import Variable
 from PIL import Image
 
+from gennet import post_slack
+
 
 def make_image(gen, dis, rows, cols, output_dir, filename='image.png'):
     np.random.seed(0)
@@ -20,7 +22,7 @@ def make_image(gen, dis, rows, cols, output_dir, filename='image.png'):
     _, _, H, W = x.shape
     x = x.reshape((rows, cols, gen.n_color, H, W))
     x = x.transpose(0, 3, 1, 4, 2)
-    if gen.n_color == 1: # grayscale
+    if gen.n_color == 1:  # grayscale
         x = x.reshape((rows * H, cols * W))
     else:
         x = x.reshape((rows * H, cols * W, gen.n_color))
@@ -47,6 +49,6 @@ def generate_and_post_slack_extension(gen, dis, rows, cols, output_dir, apikey, 
     def post(trainer):
         img_path = make_image(gen, dis, rows, cols, output_dir,
                               filename='image_epoch_{}.png'.format(trainer.updater.epoch))
-        upload_img(apikey, channel, img_path)
+        post_slack.upload_img(apikey, channel, img_path)
 
     return post

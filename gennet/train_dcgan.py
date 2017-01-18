@@ -5,9 +5,9 @@ import chainer
 from chainer import training
 from chainer.training import extensions
 
-import dataset
-from dcgan import generate, net
-from dcgan.updater import DCGANUpdater
+from gennet import dataset
+from gennet.dcgan import generate, net
+from gennet.dcgan.updater import DCGANUpdater
 
 if __name__ == '__main__':
 

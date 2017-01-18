@@ -3,8 +3,7 @@ import argparse
 import chainer
 from chainer.training import extensions
 
-import dataset
-import vae.net
+from gennet import dataset, vae.net
 
 
 def main():
