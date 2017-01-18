@@ -7,7 +7,7 @@ from chainer import Variable
 from PIL import Image
 
 
-def make_image(gen, dis, rows, cols, output_dir):
+def make_image(gen, dis, rows, cols, output_dir, filename='image.png'):
     np.random.seed(0)
     n_images = rows * cols
     xp = gen.xp
@@ -23,8 +23,7 @@ def make_image(gen, dis, rows, cols, output_dir):
     x = x.reshape((rows * H, cols * W, gen.n_color))
 
     preview_dir = os.path.join(output_dir, 'preview')
-    preview_path = os.path.join(
-        preview_dir, 'image{:0>8}.png'.format(trainer.updater.epoch))
+    preview_path = os.path.join(preview_dir, filename)
     if not os.path.exists(preview_dir):
         os.makedirs(preview_dir)
     Image.fromarray(x).save(preview_path)
@@ -34,7 +33,8 @@ def make_image(gen, dis, rows, cols, output_dir):
 def generate_image_extension(gen, dis, rows, cols, output_dir):
     @chainer.training.make_extension()
     def mkimg(trainer):
-        make_image(gen, dis, rows, cols, output_dir)
+        make_image(gen, dis, rows, cols, output_dir,
+                   filename='image_epoch_{}.png'.format(trainer.updater.epoch))
 
     return mkimg
 
@@ -42,7 +42,8 @@ def generate_image_extension(gen, dis, rows, cols, output_dir):
 def generate_and_post_slack_extension(gen, dis, rows, cols, output_dir, apikey, channel):
     @chainer.training.make_extension()
     def post(trainer):
-        img_path = make_image(gen, dis, rows, cols, output_dir)
+        img_path = make_image(gen, dis, rows, cols, output_dir,
+                              filename='image_epoch_{}.png'.format(trainer.updater.epoch))
         upload_img(apikey, channel, img_path)
 
     return post
