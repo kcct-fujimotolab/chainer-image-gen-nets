@@ -23,7 +23,8 @@ def make_image(gen, dis, rows, cols, output_dir):
     x = x.reshape((rows * H, cols * W, 3))
 
     preview_dir = os.path.join(output_dir, 'preview')
-    preview_path = os.path.join(preview_dir, 'image{:0>8}.png'.format(trainer.updater.epoch))
+    preview_path = os.path.join(
+        preview_dir, 'image{:0>8}.png'.format(trainer.updater.epoch))
     if not os.path.exists(preview_dir):
         os.makedirs(preview_dir)
     Image.fromarray(x).save(preview_path)
