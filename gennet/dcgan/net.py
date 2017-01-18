@@ -6,8 +6,64 @@ import numpy as np
 n_z = 100
 
 
-def conved_image_size(in_image_size):
-    return int(in_image_size / (2 ** 4))
+def conved_image_size(image_size, max_n_ch=512):
+    n_conv = 4
+    conved_size = image_size
+    for i in range(n_conv):
+        kwargs = get_conv2d_kwargs(i, image_size=image_size, max_n_ch=max_n_ch)
+        conved_size = check_conved_size(conved_size, kwargs['ksize'], kwargs[
+                                        'stride'], kwargs['pad'])
+    return conved_size
+
+
+def check_conved_size(image_size, ksize, stride=1, pad=0):
+    return int((image_size - ksize + 2 * pad) / stride) + 1
+
+
+def get_conv2d_kwargs(i, image_size=64, n_color=3, max_n_ch=512, deconv=False):
+    n_conv = 4
+    channels = [n_color] + [max_n_ch // (2 ** x)
+                            for x in range(0, n_conv)][::-1]
+
+    if image_size == 64:
+        kernel = [
+            {'ksize': 4, 'stride': 2, 'pad': 1},  # 64 -> 32
+            {'ksize': 4, 'stride': 2, 'pad': 1},  # 32 -> 16
+            {'ksize': 4, 'stride': 2, 'pad': 1},  # 16 -> 8
+            {'ksize': 4, 'stride': 2, 'pad': 1},  # 8 -> 4
+        ]
+    elif image_size == 32:
+        kernel = [
+            {'ksize': 3, 'stride': 1, 'pad': 1},  # 32 -> 32
+            {'ksize': 4, 'stride': 2, 'pad': 1},  # 32 -> 16
+            {'ksize': 4, 'stride': 2, 'pad': 1},  # 16 -> 8
+            {'ksize': 4, 'stride': 2, 'pad': 1},  # 8 -> 4
+        ]
+    elif image_size == 28:
+        kernel = [
+            {'ksize': 3, 'stride': 3, 'pad': 1},  # 28 -> 10
+            {'ksize': 2, 'stride': 2, 'pad': 1},  # 10 -> 6
+            {'ksize': 2, 'stride': 2, 'pad': 1},  # 6 -> 4
+            {'ksize': 2, 'stride': 2, 'pad': 1},  # 4 -> 3
+        ]
+    else:
+        raise NotImplementedError(
+            '(image_size == {}) is not implemented'.format(image_size))
+
+    if deconv:
+        kwargs = {
+            'in_channels': channels[n_conv - i],
+            'out_channels': channels[n_conv - i - 1],
+        }
+        kwargs.update(kernel[n_conv - i - 1])
+    else:
+        kwargs = {
+            'in_channels': channels[i],
+            'out_channels': channels[i + 1],
+        }
+        kwargs.update(kernel[i])
+
+    return kwargs
 
 
 class Generator(chainer.Chain):
@@ -18,11 +74,14 @@ class Generator(chainer.Chain):
         self.conved_size = conved_image_size(image_size)
         super(Generator, self).__init__(
             l0=L.Linear(n_z, self.conved_size ** 2 * 512, wscale=wscale),
-            dc1=L.Deconvolution2D(512, 256, 4, stride=2, pad=1, wscale=wscale),
-            dc2=L.Deconvolution2D(256, 128, 4, stride=2, pad=1, wscale=wscale),
-            dc3=L.Deconvolution2D(128, 64, 4, stride=2, pad=1, wscale=wscale),
+            dc1=L.Deconvolution2D(
+                **get_conv2d_kwargs(0, image_size, n_color, 512, deconv=True), wscale=wscale),
+            dc2=L.Deconvolution2D(
+                **get_conv2d_kwargs(1, image_size, n_color, 512, deconv=True), wscale=wscale),
+            dc3=L.Deconvolution2D(
+                **get_conv2d_kwargs(2, image_size, n_color, 512, deconv=True), wscale=wscale),
             dc4=L.Deconvolution2D(
-                64, n_color, 4, stride=2, pad=1, wscale=wscale),
+                **get_conv2d_kwargs(3, image_size, n_color, 512, deconv=True), wscale=wscale),
             bn0l=L.BatchNormalization(self.conved_size ** 2 * 512),
             bn0=L.BatchNormalization(512),
             bn1=L.BatchNormalization(256),
@@ -64,10 +123,14 @@ class Discriminator(chainer.Chain):
         self.n_color = n_color
         self.conved_size = conved_image_size(image_size)
         super(Discriminator, self).__init__(
-            c0=L.Convolution2D(n_color, 64, 4, stride=2, pad=1, wscale=wscale),
-            c1=L.Convolution2D(64, 128, 4, stride=2, pad=1, wscale=wscale),
-            c2=L.Convolution2D(128, 256, 4, stride=2, pad=1, wscale=wscale),
-            c3=L.Convolution2D(256, 512, 4, stride=2, pad=1, wscale=wscale),
+            c0=L.Convolution2D(
+                **get_conv2d_kwargs(0, image_size, n_color, 512), wscale=wscale),
+            c1=L.Convolution2D(
+                **get_conv2d_kwargs(1, image_size, n_color, 512), wscale=wscale),
+            c2=L.Convolution2D(
+                **get_conv2d_kwargs(2, image_size, n_color, 512), wscale=wscale),
+            c3=L.Convolution2D(
+                **get_conv2d_kwargs(3, image_size, n_color, 512), wscale=wscale),
             l4=L.Linear(self.conved_size ** 2 * 512, 2, wscale=wscale),
             bn0=L.BatchNormalization(64),
             bn1=L.BatchNormalization(128),
