@@ -32,8 +32,6 @@ if __name__ == '__main__':
                         help='Directory to output the result')
     parser.add_argument('--resume', '-r', default='',
                         help='Resume the training from snapshot')
-    parser.add_argument('--unit', '-u', type=int, default=1000,
-                        help='Number of units')
     parser.add_argument('--snapshot_interval', type=int, default=50)
     parser.add_argument('--filename', default='{epoch}.png')
     args = parser.parse_args()
