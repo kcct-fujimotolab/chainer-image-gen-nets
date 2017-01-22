@@ -6,8 +6,7 @@ from chainer import training
 from chainer.training import extensions
 
 from gennet import dataset
-from gennet.dcgan import generate
-from gennet.dcgan import net
+from gennet.dcgan import generate, net
 from gennet.dcgan.updater import DCGANUpdater
 
 
