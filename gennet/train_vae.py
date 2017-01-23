@@ -8,7 +8,15 @@ from gennet import dataset, vae.net
 
 def main():
     parser = argparse.ArgumentParser(description='Training with VAE')
-    parser.add_argument('dataset', help='The npz formatted dataset file')
+    dataset_options = parser.add_mutually_exclusive_group(required=True)
+    dataset_options.add_argument(
+        '--dataset', '-d', help='The npz formatted dataset file')
+    dataset_options.add_argument(
+        '--use-mnist', action='store_true', help='Use mnist dataset')
+    dataset_options.add_argument(
+        '--use-cifar10', action='store_true', help='Use CIFAR-10 dataset')
+    dataset_options.add_argument(
+        '--use-cifar100', action='store_true', help='Use CIFAR-100 dataset')
     parser.add_argument('--batchsize', '-b', type=int, default=100,
                         help='Number of images in each mini-batch')
     parser.add_argument('--epoch', '-e', type=int, default=1000,
@@ -36,9 +44,23 @@ def main():
     print('# dim z: {}'.format(args.dimz))
     print('')
 
-    train = dataset.load(args.dataset, ndim=1)
-    train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
+    if args.dataset:
+        raise NotImplementedError()
+    elif args.use_mnist:
+        train, test = chainer.datasets.get_mnist(
+            withlabel=False, scale=255., ndim=1)
+    elif args.use_cifar10:
+        train, test = chainer.datasets.get_cifar10(
+            withlabel=False, scale=255., ndim=1)
+    elif args.use_cifar100:
+        train, test = chainer.datasets.get_cifar100(
+            withlabel=False, scale=255., ndim=1)
+
     n_train, image_size = train.shape
+
+    train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
+    test_iter = chainer.iterators.SerialIterator(test, args.batchsize,
+                                                 repeat=False, shuffle=False)
 
     model = vae.net.VAE(image_size, args.dimz, 500)
     if args.gpu >= 0:
@@ -53,8 +75,10 @@ def main():
     trainer = chainer.training.Trainer(
         updater, (args.epoch, 'epoch'), out=args.out)
 
+    trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu))
     trainer.extend(extensions.LogReport())
-    trainer.extend(extensions.PrintReport(['epoch', 'main/loss']))
+    trainer.extend(extensions.PrintReport(
+        ['epoch', 'main/loss', 'validation/main/loss']))
     trainer.extend(extensions.ProgressBar())
     trainer.extend(extensions.snapshot(), trigger=(
         args.snapshot_interval, 'epoch'))
