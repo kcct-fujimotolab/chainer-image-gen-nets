@@ -1,9 +1,10 @@
 import argparse
+import os
 
 import chainer
 from chainer.training import extensions
 
-from gennet import dataset, vae.net
+from gennet.vae import net
 
 
 def main():
@@ -48,21 +49,23 @@ def main():
         raise NotImplementedError()
     elif args.use_mnist:
         train, test = chainer.datasets.get_mnist(
-            withlabel=False, scale=255., ndim=1)
+            withlabel=False, scale=255., ndim=3)
     elif args.use_cifar10:
         train, test = chainer.datasets.get_cifar10(
-            withlabel=False, scale=255., ndim=1)
+            withlabel=False, scale=255., ndim=3)
     elif args.use_cifar100:
         train, test = chainer.datasets.get_cifar100(
-            withlabel=False, scale=255., ndim=1)
+            withlabel=False, scale=255., ndim=3)
 
-    n_train, image_size = train.shape
+    n_train, n_color, H, W = train.shape
+    train = train.reshape(-1, n_color * H * W)
+    test = test.reshape(-1, n_color * H * W)
 
     train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
     test_iter = chainer.iterators.SerialIterator(test, args.batchsize,
                                                  repeat=False, shuffle=False)
 
-    model = vae.net.VAE(image_size, args.dimz, 500)
+    model = net.VAE(W * H, args.dimz, 500, n_color=n_color)
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()
         model.to_gpu()
@@ -75,13 +78,34 @@ def main():
     trainer = chainer.training.Trainer(
         updater, (args.epoch, 'epoch'), out=args.out)
 
+    snapshot_interval = (args.snapshot_interval, 'epoch')
+
     trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu))
     trainer.extend(extensions.LogReport())
     trainer.extend(extensions.PrintReport(
         ['epoch', 'main/loss', 'validation/main/loss']))
     trainer.extend(extensions.ProgressBar())
-    trainer.extend(extensions.snapshot(), trigger=(
-        args.snapshot_interval, 'epoch'))
+    trainer.extend(extensions.snapshot(
+        filename='snapshot_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
+
+    @chainer.training.make_extension()
+    def save_images(trainer):
+        out_dir = os.path.join(
+            trainer.out, 'preview_epoch_{}'.format(trainer.updater.epoch))
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        img, img_r = model.make_images(train)
+        img.save(os.path.join(out_dir, 'train.png'))
+        img_r.save(os.path.join(out_dir, 'train_reconst.png'))
+
+        img, img_r = model.make_images(test)
+        img.save(os.path.join(out_dir, 'test.png'))
+        img_r.save(os.path.join(out_dir, 'test_reconst.png'))
+
+        model.make_random_images().save(os.path.join(out_dir, 'random.png'))
+
+    trainer.extend(save_images, trigger=snapshot_interval)
 
     trainer.run()
 

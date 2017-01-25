@@ -1,13 +1,19 @@
+import math
+
 import chainer
 import chainer.functions as F
 import chainer.links as L
+import numpy as np
 import six
 from chainer.functions.loss.vae import gaussian_kl_divergence
+from PIL import Image
 
 
 class VAE(chainer.Chain):
 
-    def __init__(self, n_in, n_latent, n_h):
+    def __init__(self, n_in, n_latent, n_h, n_color=3):
+        self.n_latent = n_latent
+        self.n_color = n_color
         super(VAE, self).__init__(
             # encoder
             le1=L.Linear(n_in, n_h),
@@ -62,3 +68,41 @@ class VAE(chainer.Chain):
             return loss
 
         return loss_func
+
+    def make_hidden(self, batchsize):
+        return np.random.uniform(-1, 1, (batchsize, self.n_latent)).astype(np.float32)
+
+    def _ndarray_to_image(self, x):
+        x = np.asarray(np.clip(x * 255, 0.0, 255.0), dtype=np.uint8)
+        rows = cols = int(math.sqrt(x.shape[0]))
+        W = H = int(math.sqrt(x.shape[1] / self.n_color))
+        x = x.reshape((rows, cols, self.n_color, H, W))
+        x = x.transpose(0, 3, 1, 4, 2)
+        if self.n_color == 1:  # grayscale
+            x = x.reshape((rows * H, cols * W))
+        else:
+            x = x.reshape((rows * H, cols * W, self.n_color))
+        return Image.fromarray(x)
+
+    def make_images(self, x, rows=4, cols=4):
+        np.random.seed(0)
+        n_images = rows * cols
+
+        x = np.random.permutation(x)[:n_images]
+        x = chainer.Variable(self.xp.asarray(x))
+        x_reconstruct = self(x)
+        x = chainer.cuda.to_cpu(x.data)
+        x_reconstruct = chainer.cuda.to_cpu(x_reconstruct.data)
+        np.random.seed()
+
+        return self._ndarray_to_image(x), self._ndarray_to_image(x_reconstruct)
+
+    def make_random_images(self, rows=4, cols=4):
+        np.random.seed(0)
+        n_images = rows * cols
+        z = chainer.Variable(self.xp.asarray(self.make_hidden(n_images)))
+        x = self.decode(z)
+        x = chainer.cuda.to_cpu(x.data)
+        np.random.seed()
+
+        return self._ndarray_to_image(x)
