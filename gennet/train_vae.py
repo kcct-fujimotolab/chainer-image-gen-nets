@@ -74,7 +74,7 @@ def main():
     optimizer.setup(model)
 
     updater = chainer.training.StandardUpdater(
-        train_iter, optimizer, loss_func=model.get_loss_func(), device=args.gpu)
+        train_iter, optimizer, device=args.gpu)
     trainer = chainer.training.Trainer(
         updater, (args.epoch, 'epoch'), out=args.out)
 

@@ -11,9 +11,21 @@ from PIL import Image
 
 class VAE(chainer.Chain):
 
-    def __init__(self, n_in, n_latent, n_h, n_color=3):
+    def __init__(self, n_in, n_latent, n_h, n_color=3, C=1.0, k=1):
+        """
+        Args:
+            n_in (int): The number of input layers
+            n_latent (int): The number of latent layers (encoded layers)
+            n_h (int): The number of hidden layers
+            n_color (int): The number of color of training images
+            C (float): Usually this is 1.0. Can be changed to control the
+                second term of ELBO bound, which works as regularization.
+            k (int): Number of Monte Carlo samples used in encoded vector.
+        """
         self.n_latent = n_latent
         self.n_color = n_color
+        self.C = C
+        self.k = k
         super(VAE, self).__init__(
             # encoder
             le1=L.Linear(n_in, n_h),
@@ -26,7 +38,10 @@ class VAE(chainer.Chain):
 
     def __call__(self, x, sigmoid=True):
         """AutoEncoder"""
-        return self.decode(self.encode(x)[0], sigmoid)
+        x = self.decode(self.encode(x)[0], sigmoid)
+        loss = self.loss_func(x)
+        chainer.report({'loss': loss}, self)
+        return loss
 
     def encode(self, x):
         h1 = F.tanh(self.le1(x))
@@ -42,32 +57,23 @@ class VAE(chainer.Chain):
         else:
             return h2
 
-    def get_loss_func(self, C=1.0, k=1, train=True):
-        """Get loss function of VAE.
+    def loss_func(self, x, train=True):
+        """The loss function of VAE.
         The loss value is equal to ELBO (Evidence Lower Bound)
         multiplied by -1.
-        Args:
-            C (int): Usually this is 1.0. Can be changed to control the
-                second term of ELBO bound, which works as regularization.
-            k (int): Number of Monte Carlo samples used in encoded vector.
-            train (bool): If true loss_function is used for training.
         """
-        def loss_func(x):
-            mu, ln_var = self.encode(x)
-            batchsize = len(mu.data)
+        mu, ln_var = self.encode(x)
+        batchsize = len(mu.data)
 
-            reconstruction_loss = 0
-            for l in six.moves.range(k):
-                z = F.gaussian(mu, ln_var)
-                reconstruction_loss += F.bernoulli_nll(
-                    x, self.decode(z, sigmoid=False)) / (k * batchsize)
+        reconstruction_loss = 0
+        for l in six.moves.range(self.k):
+            z = F.gaussian(mu, ln_var)
+            reconstruction_loss += F.bernoulli_nll(
+                x, self.decode(z, sigmoid=False)) / (self.k * batchsize)
 
-            loss = reconstruction_loss + C * \
-                gaussian_kl_divergence(mu, ln_var) / batchsize
-            chainer.report({'loss': loss}, self)
-            return loss
-
-        return loss_func
+        loss = reconstruction_loss + \
+            self.C * gaussian_kl_divergence(mu, ln_var) / batchsize
+        return loss
 
     def make_hidden(self, batchsize):
         return np.random.uniform(-1, 1, (batchsize, self.n_latent)).astype(np.float32)
@@ -90,7 +96,7 @@ class VAE(chainer.Chain):
 
         x = np.random.permutation(x)[:n_images]
         x = chainer.Variable(self.xp.asarray(x))
-        x_reconstruct = self(x)
+        x_reconstruct = self.decode(self.encode(x)[0])
         x = chainer.cuda.to_cpu(x.data)
         x_reconstruct = chainer.cuda.to_cpu(x_reconstruct.data)
         np.random.seed()
