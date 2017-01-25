@@ -89,6 +89,8 @@ def main():
         'epoch', 'iteration', 'gen/loss', 'dis/loss',
     ]))
     trainer.extend(extensions.ProgressBar())
+    trainer.extend(extensions.PlotReport(
+        ['gen/loss', 'dis/loss'], 'epoch', file_name='loss.png'))
     if args.slack_apikey and args.slack_channel:
         trainer.extend(generate.generate_and_post_slack_extension(
             gen, dis, args.row, args.col, args.out, args.slack_apikey, args.slack_channel), trigger=snapshot_interval)
