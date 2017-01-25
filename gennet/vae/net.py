@@ -38,7 +38,6 @@ class VAE(chainer.Chain):
 
     def __call__(self, x, sigmoid=True):
         """AutoEncoder"""
-        x = self.decode(self.encode(x)[0], sigmoid)
         loss = self.loss_func(x)
         chainer.report({'loss': loss}, self)
         return loss

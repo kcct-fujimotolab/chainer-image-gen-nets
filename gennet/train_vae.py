@@ -49,13 +49,13 @@ def main():
         raise NotImplementedError()
     elif args.use_mnist:
         train, test = chainer.datasets.get_mnist(
-            withlabel=False, scale=255., ndim=3)
+            withlabel=False, ndim=3)
     elif args.use_cifar10:
         train, test = chainer.datasets.get_cifar10(
-            withlabel=False, scale=255., ndim=3)
+            withlabel=False, ndim=3)
     elif args.use_cifar100:
         train, test = chainer.datasets.get_cifar100(
-            withlabel=False, scale=255., ndim=3)
+            withlabel=False, ndim=3)
 
     n_train, n_color, H, W = train.shape
     train = train.reshape(-1, n_color * H * W)
