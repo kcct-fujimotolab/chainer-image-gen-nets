@@ -21,8 +21,14 @@ export SLACK_CHANNEL=<posting channel>
 
 ## Usage
 
+### Train VAE model
+Training model with [Variational Auto-Encoder](https://arxiv.org/abs/1312.6114):
+```
+python gennet/train_vae.py --use-mnist -e 300 -g 0 -o out/vae/mnist --snapshot_interval 20
+```
+
 ### Train DCGAN model
 Training model with [Deep Convolutional Generative Adversarial Network](https://arxiv.org/abs/1511.06434):
 ```
-python gennet/train_dcgan.py --use-mnist -e 300 -g 0 -o out/mnist --snapshot_interval 20 --slack-channel @fohte
+python gennet/train_dcgan.py --use-mnist -e 300 -g 0 -o out/dcgan/mnist --snapshot_interval 20 --slack-channel @fohte
 ```
