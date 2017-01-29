@@ -4,6 +4,7 @@ import os
 import chainer
 from chainer.training import extensions
 
+from gennet import util
 from gennet.vae import net
 
 
@@ -66,6 +67,8 @@ def main():
                                                  repeat=False, shuffle=False)
 
     model = net.VAE(W * H, args.dimz, 500, n_color=n_color)
+    util.save_model_json(model, 'vae.model.json', output_dir=args.out)
+
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()
         model.to_gpu()

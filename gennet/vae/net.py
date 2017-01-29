@@ -1,3 +1,4 @@
+import json
 import math
 
 import chainer
@@ -22,7 +23,9 @@ class VAE(chainer.Chain):
                 second term of ELBO bound, which works as regularization.
             k (int): Number of Monte Carlo samples used in encoded vector.
         """
+        self.n_in = n_in
         self.n_latent = n_latent
+        self.n_h = n_h
         self.n_color = n_color
         self.C = C
         self.k = k
@@ -111,3 +114,17 @@ class VAE(chainer.Chain):
         np.random.seed()
 
         return self._ndarray_to_image(x)
+
+    def to_json(self):
+        d = {
+            'class_name': self.__class__.__name__,
+            'kwargs': {
+                'n_in': self.n_in,
+                'n_h': self.n_h,
+                'n_latent': self.n_latent,
+                'n_color': self.n_color,
+                'C': self.C,
+                'k': self.k,
+            }
+        }
+        return json.dumps(d)

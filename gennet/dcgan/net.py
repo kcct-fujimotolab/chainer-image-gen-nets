@@ -1,3 +1,5 @@
+import json
+
 import chainer
 import chainer.functions as F
 import chainer.links as L
@@ -71,6 +73,7 @@ class Generator(chainer.Chain):
     def __init__(self, image_size, n_color, wscale=0.02):
         self.image_size = image_size
         self.n_color = n_color
+        self.wscale = wscale
         self.conved_size = conved_image_size(image_size)
         super(Generator, self).__init__(
             l0=L.Linear(n_z, self.conved_size ** 2 * 512, wscale=wscale),
@@ -115,12 +118,24 @@ class Generator(chainer.Chain):
     def make_hidden(self, batchsize):
         return np.random.uniform(-1, 1, (batchsize, n_z, 1, 1)).astype(np.float32)
 
+    def to_json(self):
+        d = {
+            'class_name': self.__class__.__name__,
+            'kwargs': {
+                'image_size': self.image_size,
+                'n_color': self.n_color,
+                'wscale': self.wscale,
+            }
+        }
+        return json.dumps(d)
+
 
 class Discriminator(chainer.Chain):
 
     def __init__(self, image_size, n_color, wscale=0.02):
         self.image_size = image_size
         self.n_color = n_color
+        self.wscale = wscale
         self.conved_size = conved_image_size(image_size)
         super(Discriminator, self).__init__(
             c0=L.Convolution2D(
@@ -157,3 +172,14 @@ class Discriminator(chainer.Chain):
         l = self.l4(h)
 
         return l
+
+    def to_json(self):
+        d = {
+            'class_name': self.__class__.__name__,
+            'kwargs': {
+                'image_size': self.image_size,
+                'n_color': self.n_color,
+                'wscale': self.wscale,
+            }
+        }
+        return json.dumps(d)

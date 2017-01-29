@@ -5,7 +5,7 @@ import chainer
 from chainer import training
 from chainer.training import extensions
 
-from gennet import dataset
+from gennet import dataset, util
 from gennet.dcgan import generate, net
 from gennet.dcgan.updater import DCGANUpdater
 
@@ -63,6 +63,9 @@ def main():
 
     gen = net.Generator(width, n_color)
     dis = net.Discriminator(width, n_color)
+
+    util.save_model_json(gen, 'gen.model.json', output_dir=args.out)
+    util.save_model_json(dis, 'dis.model.json', output_dir=args.out)
 
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()
