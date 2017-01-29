@@ -21,8 +21,9 @@ def convert(files, size=(64, 64)):
     return images
 
 
-def load(filename, ndim=3):
+def load(filename, ndim=3, scale=1.):
     images = numpy.load(filename)['img']
+    images *= scale / 255
     n_color = images.shape[1]
     width, height = images.shape[2:]
     if ndim == 1:

@@ -48,7 +48,7 @@ def main():
             args.out))
 
     if args.dataset:
-        train = dataset.load(args.dataset, ndim=3)
+        train = dataset.load(args.dataset, scale=255., ndim=3)
     elif args.use_mnist:
         train, _ = chainer.datasets.get_mnist(
             withlabel=False, scale=255., ndim=3)
