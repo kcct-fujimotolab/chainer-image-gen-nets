@@ -69,7 +69,7 @@ def main():
     test_iter = chainer.iterators.SerialIterator(test, args.batchsize,
                                                  repeat=False, shuffle=False)
 
-    model = net.VAE(W * H, args.dimz, 500, n_color=n_color)
+    model = net.VAE(n_color * W * H, args.dimz, 500, n_color=n_color)
     util.save_model_json(model, 'vae.model.json', output_dir=args.out)
 
     if args.gpu >= 0:
