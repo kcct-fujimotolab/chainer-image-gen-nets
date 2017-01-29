@@ -87,6 +87,10 @@ def main():
     snapshot_interval = (args.snapshot_interval, 'epoch')
     trainer.extend(extensions.snapshot(
         filename='snapshot_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
+    trainer.extend(extensions.snapshot_object(
+        gen, 'gen_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
+    trainer.extend(extensions.snapshot_object(
+        dis, 'dis_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
     trainer.extend(extensions.LogReport())
     trainer.extend(extensions.PrintReport([
         'epoch', 'iteration', 'gen/loss', 'dis/loss',
