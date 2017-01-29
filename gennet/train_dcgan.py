@@ -85,8 +85,8 @@ def main():
     trainer = training.Trainer(updater, (args.epoch, 'epoch'), out=args.out)
 
     snapshot_interval = (args.snapshot_interval, 'epoch')
-    trainer.extend(extensions.snapshot(
-        filename='snapshot_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
+    trainer.extend(extensions.snapshot(filename='snapshat.npz'),
+                   trigger=snapshot_interval)
     trainer.extend(extensions.snapshot_object(
         gen, 'gen_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
     trainer.extend(extensions.snapshot_object(

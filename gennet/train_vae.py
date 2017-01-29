@@ -91,8 +91,8 @@ def main():
     trainer.extend(extensions.PrintReport(
         ['epoch', 'main/loss', 'validation/main/loss']))
     trainer.extend(extensions.ProgressBar())
-    trainer.extend(extensions.snapshot(
-        filename='snapshot_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
+    trainer.extend(extensions.snapshot(filename='snapshot.npz'),
+                   trigger=snapshot_interval)
     trainer.extend(extensions.snapshot_object(
         model, 'model_epoch_{.updater.epoch}.npz'), trigger=snapshot_interval)
     trainer.extend(extensions.PlotReport(
