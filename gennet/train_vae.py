@@ -4,7 +4,7 @@ import os
 import chainer
 from chainer.training import extensions
 
-from gennet import util
+from gennet import dataset, util
 from gennet.vae import net
 
 
@@ -47,7 +47,10 @@ def main():
     print('')
 
     if args.dataset:
-        raise NotImplementedError()
+        imgs = dataset.load(args.dataset, ndim=3)
+        n_imgs = imgs.shape[0]
+        split_index = int(n_imgs * 0.8)
+        train, test = imgs[:split_index], imgs[split_index:]
     elif args.use_mnist:
         train, test = chainer.datasets.get_mnist(
             withlabel=False, ndim=3)
