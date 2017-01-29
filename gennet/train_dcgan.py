@@ -100,10 +100,10 @@ def main():
         ['gen/loss', 'dis/loss'], 'epoch', file_name='loss.png'))
     if args.slack_apikey and args.slack_channel:
         trainer.extend(generate.generate_and_post_slack_extension(
-            gen, dis, args.row, args.col, args.out, args.slack_apikey, args.slack_channel), trigger=snapshot_interval)
+            gen, args.row, args.col, args.out, args.slack_apikey, args.slack_channel), trigger=snapshot_interval)
     else:
         trainer.extend(generate.generate_image_extension(
-            gen, dis, args.row, args.col, args.out), trigger=snapshot_interval)
+            gen, args.row, args.col, args.out), trigger=snapshot_interval)
 
     if args.resume:
         chainer.serializers.load_npz(args.resume, trainer)

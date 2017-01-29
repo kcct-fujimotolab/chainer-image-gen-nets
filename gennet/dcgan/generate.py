@@ -9,7 +9,7 @@ from PIL import Image
 from gennet import post_slack
 
 
-def make_image(gen, dis, rows, cols, output_dir, filename='image.png'):
+def make_image(gen, rows, cols, output_dir, filename='image.png'):
     np.random.seed(0)
     n_images = rows * cols
     xp = gen.xp
@@ -35,19 +35,19 @@ def make_image(gen, dis, rows, cols, output_dir, filename='image.png'):
     return preview_path
 
 
-def generate_image_extension(gen, dis, rows, cols, output_dir):
+def generate_image_extension(gen, rows, cols, output_dir):
     @chainer.training.make_extension()
     def mkimg(trainer):
-        make_image(gen, dis, rows, cols, output_dir,
+        make_image(gen, rows, cols, output_dir,
                    filename='image_epoch_{}.png'.format(trainer.updater.epoch))
 
     return mkimg
 
 
-def generate_and_post_slack_extension(gen, dis, rows, cols, output_dir, apikey, channel):
+def generate_and_post_slack_extension(gen, rows, cols, output_dir, apikey, channel):
     @chainer.training.make_extension()
     def post(trainer):
-        img_path = make_image(gen, dis, rows, cols, output_dir,
+        img_path = make_image(gen, rows, cols, output_dir,
                               filename='image_epoch_{}.png'.format(trainer.updater.epoch))
         post_slack.upload_img(apikey, channel, img_path)
 
