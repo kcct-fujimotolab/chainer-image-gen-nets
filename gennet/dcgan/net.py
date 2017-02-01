@@ -70,6 +70,7 @@ class Generator(chainer.Chain):
 
     def __init__(self, image_size, n_z, n_color, wscale=0.02):
         self.image_size = image_size
+        self.n_z = n_z
         self.n_color = n_color
         self.wscale = wscale
         self.conved_size = conved_image_size(image_size)
@@ -121,6 +122,7 @@ class Generator(chainer.Chain):
             'class_name': self.__class__.__name__,
             'kwargs': {
                 'image_size': self.image_size,
+                'n_z': self.n_z,
                 'n_color': self.n_color,
                 'wscale': self.wscale,
             }
