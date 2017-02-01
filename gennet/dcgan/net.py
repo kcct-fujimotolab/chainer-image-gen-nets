@@ -94,21 +94,21 @@ class Generator(chainer.Chain):
     def __call__(self, z, test=False):
         h = self.l0(z)
         h = self.bn0l(h, test=test)
-        h = F.relu(h)
+        h = F.leaky_relu(h)
         h = F.reshape(h, (z.data.shape[0], 512,
                           self.conved_size, self.conved_size))
 
         h = self.dc1(h)
         h = self.bn1(h, test=test)
-        h = F.relu(h)
+        h = F.leaky_relu(h)
 
         h = self.dc2(h)
         h = self.bn2(h, test=test)
-        h = F.relu(h)
+        h = F.leaky_relu(h)
 
         h = self.dc3(h)
         h = self.bn3(h, test=test)
-        h = F.relu(h)
+        h = F.leaky_relu(h)
 
         x = self.dc4(h)
 
