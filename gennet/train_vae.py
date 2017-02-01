@@ -27,8 +27,8 @@ def main():
                         help='GPU ID (negative value indicates CPU)')
     parser.add_argument('--out', '-o', default='result',
                         help='Directory to output the result')
-    # parser.add_argument('--resume', '-r', default='',
-    #                     help='Resume the training from snapshot')
+    parser.add_argument('--resume', '-r', default='',
+                        help='Resume the training from snapshot')
     # parser.add_argument('--unit', '-u', type=int, default=1000,
     #                     help='Number of units')
     # parser.add_argument('--snapshot', type=int, nargs='*',
@@ -116,6 +116,9 @@ def main():
         model.make_random_images().save(os.path.join(out_dir, 'random.png'))
 
     trainer.extend(save_images, trigger=snapshot_interval)
+
+    if args.resume:
+        chainer.serializers.load_npz(args.resume, trainer)
 
     trainer.run()
 
