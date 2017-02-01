@@ -155,19 +155,19 @@ class Discriminator(chainer.Chain):
 
     def __call__(self, x, test=False):
         h = self.c0(x)
-        h = F.leaky_relu(h)
+        h = F.relu(h)
 
         h = self.c1(h)
         h = self.bn1(h, test=test)
-        h = F.leaky_relu(h)
+        h = F.relu(h)
 
         h = self.c2(h)
         h = self.bn2(h, test=test)
-        h = F.leaky_relu(h)
+        h = F.relu(h)
 
         h = self.c3(h)
         h = self.bn3(h, test=test)
-        h = F.leaky_relu(h)
+        h = F.relu(h)
 
         l = self.l4(h)
 
