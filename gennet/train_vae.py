@@ -29,14 +29,9 @@ def main():
                         help='Directory to output the result')
     parser.add_argument('--resume', '-r', default='',
                         help='Resume the training from snapshot')
-    # parser.add_argument('--unit', '-u', type=int, default=1000,
-    #                     help='Number of units')
-    # parser.add_argument('--snapshot', type=int, nargs='*',
-    #                     default=range(1, 10001, 10))
-    # parser.add_argument('--filename', default='{epoch}.png')
     parser.add_argument('--dimz', '-z', type=int, default=20,
                         help='dimention of encoded vector')
-    parser.add_argument('--snapshot_interval', '-s', type=int, default=1000,
+    parser.add_argument('--snapshot-interval', '-s', type=int, default=50,
                         help='Interval of snapshot')
     args = parser.parse_args()
 
