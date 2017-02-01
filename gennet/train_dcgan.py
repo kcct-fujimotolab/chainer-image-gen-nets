@@ -38,6 +38,8 @@ def main():
         '--slack-apikey', default=os.environ.get('SLACK_APIKEY'))
     parser.add_argument('--slack-channel',
                         default=os.environ.get('SLACK_CHANNEL'))
+    parser.add_argument('--dimz', '-z', type=int, default=100,
+                        help='dimention of encoded vector')
     args = parser.parse_args()
 
     if args.slack_apikey and args.slack_channel:
@@ -61,7 +63,7 @@ def main():
 
     n_train, n_color, width, height = train.shape
 
-    gen = net.Generator(width, n_color)
+    gen = net.Generator(width, args.dimz, n_color)
     dis = net.Discriminator(width, n_color)
 
     util.save_model_json(gen, 'gen.model.json', output_dir=args.out)

@@ -5,8 +5,6 @@ import chainer.functions as F
 import chainer.links as L
 import numpy as np
 
-n_z = 100
-
 
 def conved_image_size(image_size, max_n_ch=512):
     n_conv = 4
@@ -70,13 +68,13 @@ def get_conv2d_kwargs(i, image_size=64, n_color=3, max_n_ch=512, deconv=False):
 
 class Generator(chainer.Chain):
 
-    def __init__(self, image_size, n_color, wscale=0.02):
+    def __init__(self, image_size, n_z, n_color, wscale=0.02):
         self.image_size = image_size
         self.n_color = n_color
         self.wscale = wscale
         self.conved_size = conved_image_size(image_size)
         super(Generator, self).__init__(
-            l0=L.Linear(n_z, self.conved_size ** 2 * 512, wscale=wscale),
+            l0=L.Linear(self.n_z, self.conved_size ** 2 * 512, wscale=wscale),
             dc1=L.Deconvolution2D(
                 **get_conv2d_kwargs(0, image_size, n_color, 512, deconv=True), wscale=wscale),
             dc2=L.Deconvolution2D(
@@ -116,7 +114,7 @@ class Generator(chainer.Chain):
         return x
 
     def make_hidden(self, batchsize):
-        return np.random.uniform(-1, 1, (batchsize, n_z, 1, 1)).astype(np.float32)
+        return np.random.uniform(-1, 1, (batchsize, self.n_z, 1, 1)).astype(np.float32)
 
     def to_json(self):
         d = {
