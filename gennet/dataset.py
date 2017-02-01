@@ -47,11 +47,11 @@ def main():
     parser.add_argument('input_dir')
     parser.add_argument('--output', '-o', default='dataset.npz')
     parser.add_argument('--compress', '-c', action='store_true')
-    parser.add_argument('--resize', '-r', nargs=2, default=(64, 64), type=int)
+    parser.add_argument('--size', '-s', nargs=2, type=int, required=True)
     args = parser.parse_args()
 
     files = glob.iglob(os.path.join(args.input_dir, '*'))
-    images = convert(files, size=args.resize)
+    images = convert(files, size=args.size)
     save(args.output, images, compress=args.compress)
     print('{} files compressed and saved as {}'.format(len(images), args.output))
 
