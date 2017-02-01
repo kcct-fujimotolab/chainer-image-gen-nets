@@ -31,7 +31,7 @@ def main():
                         help='Directory to output the result')
     parser.add_argument('--resume', '-r', default='',
                         help='Resume the training from snapshot')
-    parser.add_argument('--snapshot_interval', type=int, default=50)
+    parser.add_argument('--snapshot-interval', '-s', type=int, default=50)
     parser.add_argument('--row', type=int, default=4)
     parser.add_argument('--col', type=int, default=4)
     parser.add_argument(
