@@ -75,13 +75,13 @@ def main():
     optimizer.setup(model)
 
     updater = chainer.training.StandardUpdater(
-        train_iter, optimizer, device=args.gpu)
+        train_iter, optimizer, device=args.gpu, loss_func=model.loss_func)
     trainer = chainer.training.Trainer(
         updater, (args.epoch, 'epoch'), out=args.out)
 
     snapshot_interval = (args.snapshot_interval, 'epoch')
 
-    trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu))
+    trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu, eval_func=model.loss_func))
     trainer.extend(extensions.LogReport())
     trainer.extend(extensions.PrintReport(
         ['epoch', 'main/loss', 'validation/main/loss']))

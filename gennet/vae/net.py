@@ -41,9 +41,7 @@ class VAE(chainer.Chain):
 
     def __call__(self, x, sigmoid=True):
         """AutoEncoder"""
-        loss = self.loss_func(x)
-        chainer.report({'loss': loss}, self)
-        return loss
+        return self.decode(self.encode(x)[0], sigmoid)
 
     def encode(self, x):
         h1 = F.tanh(self.le1(x))
@@ -75,6 +73,7 @@ class VAE(chainer.Chain):
 
         loss = reconstruction_loss + \
             self.C * gaussian_kl_divergence(mu, ln_var) / batchsize
+        chainer.report({'loss': loss}, self)
         return loss
 
     def make_hidden(self, batchsize):
