@@ -19,6 +19,9 @@ class DatasetSimilarity(object):
             [self.xp.dot(a, b) / (self.xp.linalg.norm(a) * self.xp.linalg.norm(b))
              for a in self.a for b in self.b])
 
+    def mean_squared_error(self):
+        return self.xp.array([self.xp.average((a - b) ** 2) for a in self.a for b in self.b])
+
 
 def split_dataset_arg(arg):
     n_colon = arg.count(':')
@@ -84,6 +87,8 @@ def main():
         ''')
     group.add_argument('a')
     group.add_argument('b')
+    parser.add_argument(
+        '--method', '-m', choices=('cosine', 'mse'), required=True)
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help='GPU ID (negative value indicates CPU)')
     parser.add_argument('--head', type=int, default=50)
@@ -98,12 +103,20 @@ def main():
     b = load_dataset(b_dataset, b_filter, shuffle=b_num is not None)[:b_num]
 
     sim = DatasetSimilarity(a, b, device=args.gpu)
-    cos = sim.cosine()
 
-    cos = chainer.cuda.to_cpu(cos)
-    cos = np.sort(cos)[::-1]
-    for c in cos[:args.head]:
-        print(c)
+    if args.method == 'cosine':
+        similarity = sim.cosine()
+    elif args.method == 'mse':
+        similarity = sim.mean_squared_error()
+
+    similarity = chainer.cuda.to_cpu(similarity)
+    similarity = np.sort(similarity)
+
+    if args.method == 'cosine':
+        similarity = similarity[::-1]
+
+    for s in similarity[:args.head]:
+        print(s)
 
 
 if __name__ == '__main__':
