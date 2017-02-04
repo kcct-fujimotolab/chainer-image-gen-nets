@@ -81,7 +81,8 @@ def main():
 
     snapshot_interval = (args.snapshot_interval, 'epoch')
 
-    trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu, eval_func=model.loss_func))
+    trainer.extend(extensions.Evaluator(test_iter, model,
+                                        device=args.gpu, eval_func=model.loss_func))
     trainer.extend(extensions.LogReport())
     trainer.extend(extensions.PrintReport(
         ['epoch', 'main/loss', 'validation/main/loss']))
