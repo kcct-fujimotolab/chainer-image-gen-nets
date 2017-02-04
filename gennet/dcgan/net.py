@@ -84,30 +84,21 @@ class Generator(chainer.Chain):
                 **get_conv2d_kwargs(2, image_size, n_color, 512, deconv=True), wscale=wscale),
             dc4=L.Deconvolution2D(
                 **get_conv2d_kwargs(3, image_size, n_color, 512, deconv=True), wscale=wscale),
-            bn0l=L.BatchNormalization(self.conved_size ** 2 * 512),
-            bn0=L.BatchNormalization(512),
-            bn1=L.BatchNormalization(256),
-            bn2=L.BatchNormalization(128),
-            bn3=L.BatchNormalization(64),
         )
 
     def __call__(self, z, test=False):
         h = self.l0(z)
-        h = self.bn0l(h, test=test)
         h = F.relu(h)
         h = F.reshape(h, (z.data.shape[0], 512,
                           self.conved_size, self.conved_size))
 
         h = self.dc1(h)
-        h = self.bn1(h, test=test)
         h = F.relu(h)
 
         h = self.dc2(h)
-        h = self.bn2(h, test=test)
         h = F.relu(h)
 
         h = self.dc3(h)
-        h = self.bn3(h, test=test)
         h = F.relu(h)
 
         x = self.dc4(h)
@@ -147,10 +138,6 @@ class Discriminator(chainer.Chain):
             c3=L.Convolution2D(
                 **get_conv2d_kwargs(3, image_size, n_color, 512), wscale=wscale),
             l4=L.Linear(self.conved_size ** 2 * 512, 2, wscale=wscale),
-            bn0=L.BatchNormalization(64),
-            bn1=L.BatchNormalization(128),
-            bn2=L.BatchNormalization(256),
-            bn3=L.BatchNormalization(512),
         )
 
     def __call__(self, x, test=False):
@@ -158,15 +145,12 @@ class Discriminator(chainer.Chain):
         h = F.leaky_relu(h)
 
         h = self.c1(h)
-        h = self.bn1(h, test=test)
         h = F.leaky_relu(h)
 
         h = self.c2(h)
-        h = self.bn2(h, test=test)
         h = F.leaky_relu(h)
 
         h = self.c3(h)
-        h = self.bn3(h, test=test)
         h = F.leaky_relu(h)
 
         l = self.l4(h)
