@@ -6,17 +6,14 @@ import numpy
 import PIL.Image
 
 
-def convert(files, size=(64, 64)):
+def convert(files):
     include_exts = ['.jpg', '.jpeg', '.gif', '.png']
     files = [f for f in files if os.path.splitext(f)[1] in include_exts]
-    images = numpy.empty(
-        (len(files), 3, size[0], size[1]), dtype=numpy.float32)
 
-    for i, f in enumerate(files):
-        img = PIL.Image.open(f).convert('RGB').resize(size)
-        # convert [[[r, g, b]]] to [[[r]], [[g]], [[b]]]
-        img = numpy.asarray(img).astype(numpy.float32).transpose(2, 0, 1)
-        images[i] = img
+    images = numpy.asarray([
+        numpy.asarray(PIL.Image.open(f).convert('RGB')).astype(
+            numpy.float32).transpose(2, 0, 1)
+        for f in files])
 
     return images
 
@@ -47,11 +44,10 @@ def main():
     parser.add_argument('input_dir')
     parser.add_argument('--output', '-o', default='dataset.npz')
     parser.add_argument('--compress', '-c', action='store_true')
-    parser.add_argument('--size', '-s', nargs=2, type=int, required=True)
     args = parser.parse_args()
 
     files = glob.iglob(os.path.join(args.input_dir, '*'))
-    images = convert(files, size=args.size)
+    images = convert(files)
     save(args.output, images, compress=args.compress)
     print('{} files compressed and saved as {}. (shape: {})'.format(
         len(images), args.output, images.shape))
